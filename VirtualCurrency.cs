@@ -1,44 +1,47 @@
 ﻿using System.ComponentModel;
+using UMDataManagement;
 using System.Runtime.CompilerServices;
-using JetBrains.Annotations;
-using UnityEngine;
-using UnityEngine.Serialization;
+
 
 namespace UMGS
 {
-    [System.Serializable]
-    public class VirtualCurrency : INotifyPropertyChanged
-    {
-        private int _id;
-        public string displayName;
-        public bool IsAvailable => PlayerPrefs.HasKey(displayName);
-
-        public int value
-        {
-            get => PlayerPrefs.GetInt(displayName);
-            set
-            {
-                PlayerPrefs.SetInt(displayName, value);
-                OnPropertyChanged();
-            }
-        }
-
-        public int Id => _id;
-
-        public VirtualCurrency(string displayName, int id)
-        {
-            this.displayName = displayName;
-            _id = id;
-        }
 
 
-        public event PropertyChangedEventHandler PropertyChanged;
+	[System.Serializable]
+	public class VirtualCurrency : INotifyPropertyChanged
+	{
 
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            
-        }
-    }
+		public VirtualCurrency(Currency name, float initValue = 0)
+		{
+			Name = name;
+			if (!IsAvailable)
+			{
+				value = initValue;
+			}
+		}
+
+		public Currency Name;
+		public bool     IsAvailable => DataManager.Contains(Name.ToString());
+
+		public float value
+		{
+			get => DataManager.Get<float>(Name.ToString());
+			set
+			{
+				DataManager.Save(Name.ToString(), value);
+				OnPropertyChanged();
+			}
+		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+
+		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
+
+	}
+
+
 }

@@ -1,25 +1,23 @@
 ﻿using System;
-using UnityEngine.Events;
 
 namespace UMGS
 {
     public interface IPurchasable
     {
-        int Price
+        float Price
         {
             get;
             set;
         }
-        string VirtualCurrencyID
+        Currency CurrencyName
         {
             get;
-            set;
         }
         bool IsPurchased
         {
             get;
             set;
         }
-        bool Purchase (Action OnPurchaseSuccess,Action OnPurchaseFailed,bool isFree=false);
+        void Purchased() ;
     }
 }
