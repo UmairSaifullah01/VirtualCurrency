@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
-using UMDataManagement;
+using GameDevUtils.DataManagement;
 using System.Runtime.CompilerServices;
 
 
-namespace UMGS
+namespace GameDevUtils.VirtualCurrencySystem
 {
 
 

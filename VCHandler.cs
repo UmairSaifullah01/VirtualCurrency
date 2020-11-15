@@ -3,10 +3,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 
-namespace UMGS
+namespace GameDevUtils.VirtualCurrencySystem
 {
 
 

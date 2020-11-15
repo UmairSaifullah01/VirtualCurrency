@@ -3,7 +3,7 @@ using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace UMGS
+namespace GameDevUtils.VirtualCurrencySystem
 {
     public abstract class CurrencyBinding : MonoBehaviour
     {

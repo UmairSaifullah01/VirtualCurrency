@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UMGS
+namespace GameDevUtils.VirtualCurrencySystem
 {
     public interface IPurchasable
     {
