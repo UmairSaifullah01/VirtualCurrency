@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
-using GameDevUtils.DataManagement;
 using System.Runtime.CompilerServices;
+using THEBADDEST.DataManagement;
 
 
-namespace GameDevUtils.VirtualCurrencySystem
+namespace THEBADDEST.VirtualCurrencySystem
 {
 
 
@@ -21,14 +21,14 @@ namespace GameDevUtils.VirtualCurrencySystem
 		}
 
 		public Currency Name;
-		public bool     IsAvailable => DataManager.Contains(Name.ToString());
+		public bool     IsAvailable => DataPersistor.Contains(Name.ToString());
 
 		public float value
 		{
-			get => DataManager.Get<float>(Name.ToString());
+			get => DataPersistor.Get<float>(Name.ToString());
 			set
 			{
-				DataManager.Save(Name.ToString(), value);
+				DataPersistor.Save(Name.ToString(), value);
 				OnPropertyChanged();
 			}
 		}

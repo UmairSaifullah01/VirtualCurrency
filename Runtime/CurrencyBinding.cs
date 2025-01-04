@@ -3,7 +3,7 @@ using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameDevUtils.VirtualCurrencySystem
+namespace THEBADDEST.VirtualCurrencySystem
 {
     public abstract class CurrencyBinding : MonoBehaviour
     {

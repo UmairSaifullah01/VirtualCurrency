@@ -2,7 +2,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace GameDevUtils.VirtualCurrencySystem
+namespace THEBADDEST.VirtualCurrencySystem
 {
 
 
