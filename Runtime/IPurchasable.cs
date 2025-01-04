@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameDevUtils.VirtualCurrencySystem
+namespace THEBADDEST.VirtualCurrencySystem
 {
     public interface IPurchasable
     {

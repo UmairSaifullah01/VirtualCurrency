@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 
 
-namespace GameDevUtils.VirtualCurrencySystem
+namespace THEBADDEST.VirtualCurrencySystem
 {
 
 
