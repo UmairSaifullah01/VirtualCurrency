@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
+using THEBADDEST.DataManagement;
 using UnityEngine;
 
 
@@ -9,142 +10,199 @@ namespace THEBADDEST.VirtualCurrencySystem
 {
 
 
-	public class VCHandler
+	public class VCHandler : IDataElement
 	{
 
-		#region Static Fields
+		static        Dictionary<CurrencyType, VirtualCurrency> virtualCurrencies;
+		public        string                                    dataTag => "VCHandler";
+		public static VCHandler                                 vcHandler;
 
-		static VCHandler instance;
-		public static VCHandler Instance
-		{
-			get
-			{
-				if (instance == null)
-					instance = new VCHandler();
-				return instance;
-			}
-		}
-
+		/// <summary>
+		/// Automatically called by Unity Runtime when the application is loaded.
+		/// Initializes the static <see cref="VCHandler"/> instance and all virtual currencies by default value.
+		/// </summary>
 		[RuntimeInitializeOnLoadMethod]
-		static void Initialize()
+		public static void Initialize()
 		{
-			if (Instance == null)
+			vcHandler = new VCHandler();
+			var types = Enum.GetNames(typeof(CurrencyType));
+			virtualCurrencies = new Dictionary<CurrencyType, VirtualCurrency>(types.Length);
+			for (int i = 0; i < types.Length; i++)
 			{
-				instance = new VCHandler();
-			}
-		}
-
-		#endregion
-
-
-		VirtualCurrency[] virtualCurrencies;
-
-
-		// Constructor .....
-		VCHandler()
-		{
-			//Get all Currencies values if saved
-			var v = Enum.GetNames(typeof(Currency));
-			virtualCurrencies = new VirtualCurrency[v.Length];
-			StringBuilder builder = new StringBuilder("Initializing Virtual Currency");
-			for (int i = 0; i < v.Length; i++)
-			{
-				if (Enum.TryParse(v[i], out Currency currency))
+				if (Enum.TryParse(types[i], out CurrencyType currency))
 				{
-					builder.Append(" ");
-					virtualCurrencies[i] = new VirtualCurrency(currency, 0);
-					builder.Append(currency);
+					var virtualCurrency = new VirtualCurrency(currency, 0);
+					virtualCurrencies.Add(currency, virtualCurrency);
 				}
 			}
 
-			Debug.Log(builder.ToString());
+			DataPersistor.Get(vcHandler);
 		}
 
-		public void OnValueChangeRegister(Currency currencyName, PropertyChangedEventHandler changeEvent)
+		/// <summary>
+		/// Persists the current state of all virtual currencies to the default data storage location.
+		/// </summary>
+		public static void Save()
 		{
-			foreach (VirtualCurrency vc in virtualCurrencies)
+			DataPersistor.Save(vcHandler);
+		}
+
+/// <summary>
+/// Registers a <see cref="PropertyChangedEventHandler"/> to a virtual currency's value change event.
+/// </summary>
+/// <param name="currencyType">The type of currency to register the event handler for.</param>
+/// <param name="changeEvent">The event handler to register.</param>
+		public static void OnValueChangeRegister(CurrencyType currencyType, PropertyChangedEventHandler changeEvent)
+		{
+			virtualCurrencies[currencyType].PropertyChanged += changeEvent;
+			virtualCurrencies[currencyType].OnPropertyChanged();
+		}
+
+		/// <summary>
+		/// Unregisters a <see cref="PropertyChangedEventHandler"/> from a virtual currency's value change event.
+		/// </summary>
+		/// <param name="currencyType">The type of currency to unregister the event handler from.</param>
+		/// <param name="changeEvent">The event handler to unregister.</param>
+		public static void OnValueChangeUnregister(CurrencyType currencyType, PropertyChangedEventHandler changeEvent)
+		{
+			virtualCurrencies[currencyType].PropertyChanged -= changeEvent;
+		}
+
+
+		/// <summary>
+		/// Retrieves the current value of a virtual currency.
+		/// </summary>
+		/// <param name="currencyType">The type of currency to retrieve the value of.</param>
+		/// <returns>The current value of the specified currency.</returns>
+		public static float GetValue(CurrencyType currencyType)
+		{
+			return virtualCurrencies[currencyType].value;
+		}
+
+		/// <summary>
+		/// Increases the value of a virtual currency by a specified amount.
+		/// </summary>
+		/// <param name="currencyType">The type of currency to increase.</param>
+		/// <param name="value">The amount to add to the currency. Can be negative to decrease the currency.</param>
+		/// <returns>The new value of the currency.</returns>
+		public static float AddValue(CurrencyType currencyType, float value)
+		{
+			return virtualCurrencies[currencyType].value += value;
+		}
+
+		/// <summary>
+		/// Sets the value of a virtual currency.
+		/// </summary>
+		/// <param name="currencyType">The type of currency to set.</param>
+		/// <param name="value">The value to set the currency to.</param>
+		public static void SetValue(CurrencyType currencyType, float value)
+		{
+			virtualCurrencies[currencyType].value = value;
+		}
+
+		/// <summary>
+		/// Buy an item using virtual currency.
+		/// </summary>
+		/// <param name="purchasable">The item to purchase.</param>
+		/// <returns>True if the item was purchased successfully, false otherwise.</returns>
+		public static bool Buy(IPurchasable purchasable)
+		{
+			foreach (var currencyValue in purchasable.currencyValues)
 			{
-				if (vc.Name == currencyName)
+				if (virtualCurrencies[currencyValue.type].value >= currencyValue.price)
 				{
-					vc.PropertyChanged += changeEvent;
-					changeEvent.Invoke(vc, null);
-					return;
+					virtualCurrencies[currencyValue.type].value -= currencyValue.price;
+					purchasable.PurchaseSuccess();
+					return true;
 				}
 			}
-		}
 
-		public void OnValueChangeUnregister(Currency currencyName, PropertyChangedEventHandler changeEvent)
-		{
-			foreach (VirtualCurrency vc in virtualCurrencies)
-			{
-				if (vc.Name == currencyName)
-				{
-					vc.PropertyChanged -= changeEvent;
-					return;
-				}
-			}
-		}
-
-
-		public float GetValue(Currency currencyName)
-		{
-			return (from vc in virtualCurrencies where vc.Name == currencyName select vc.value).FirstOrDefault();
-		}
-
-		public float AddValue(Currency currencyName, float value)
-		{
-			foreach (VirtualCurrency vc in virtualCurrencies)
-			{
-				if (vc.Name == currencyName)
-				{
-					vc.value += value;
-					return vc.value;
-				}
-			}
-
-			return 0.0f;
-		}
-
-		public void SetValue(Currency currencyName, float value)
-		{
-			foreach (VirtualCurrency vc in virtualCurrencies)
-			{
-				if (vc.Name == currencyName)
-				{
-					vc.value = value;
-					return;
-				}
-			}
-		}
-
-		public bool Buy(IPurchasable purchasable, Action OnPurchaseSuccess, Action OnPurchaseFailed)
-		{
-			for (int i = 0; i < virtualCurrencies.Length; i++)
-			{
-				if (virtualCurrencies[i].Name == purchasable.CurrencyName)
-				{
-					if (virtualCurrencies[i].value >= purchasable.Price)
-					{
-						virtualCurrencies[i].value -= purchasable.Price;
-						purchasable.Purchased();
-						OnPurchaseSuccess?.Invoke();
-						return true;
-					}
-					else
-					{
-						OnPurchaseFailed?.Invoke();
-						return false;
-					}
-				}
-			}
-
-			OnPurchaseFailed?.Invoke();
+			purchasable.PurchasedFailed();
 			return false;
+		}
+
+		/// <summary>
+		/// Buy with Specific Currency
+		/// </summary>
+		/// <param name="purchasable"></param>
+		/// <param name="currencyType"></param>
+		/// <returns></returns>
+		public static bool Buy(IPurchasable purchasable, CurrencyType currencyType)
+		{
+			CurrencyValue value = purchasable.currencyValues.First(c => c.type == currencyType);
+			if (virtualCurrencies[currencyType].value >= value.price)
+			{
+				virtualCurrencies[currencyType].value -= value.price;
+				purchasable.PurchaseSuccess();
+				return true;
+			}
+
+			purchasable.PurchasedFailed();
+			return false;
+		}
+
+		/// <summary>
+		/// Buy with Possible Currency  
+		/// </summary>
+		/// <param name="purchasable"></param>
+		/// <param name="onPurchaseSuccess"></param>
+		/// <param name="onPurchaseFailed"></param>
+		/// <returns></returns>
+		public static bool Buy(IPurchasable purchasable, Action onPurchaseSuccess, Action onPurchaseFailed)
+		{
+			foreach (var currencyValue in purchasable.currencyValues)
+			{
+				if (virtualCurrencies[currencyValue.type].value >= currencyValue.price)
+				{
+					virtualCurrencies[currencyValue.type].value -= currencyValue.price;
+					purchasable.PurchaseSuccess();
+					onPurchaseSuccess?.Invoke();
+					return true;
+				}
+			}
+
+			purchasable.PurchasedFailed();
+			onPurchaseFailed?.Invoke();
+			return false;
+		}
+
+
+		/// <summary>
+		/// Saves the current state of all virtual currencies in the VCHandler as a Data object.
+		/// </summary>
+		/// <returns>A Data object containing the current values of all virtual currencies.</returns>
+		public Data SaveData()
+		{
+			float[] values = new float[virtualCurrencies.Count];
+			int     i      = 0;
+			foreach (var currency in virtualCurrencies)
+			{
+				values[i] = currency.Value.value;
+				i++;
+			}
+
+			return new DataArray<float>(values);
+		}
+
+		/// <summary>
+		/// Loads the given Data object into the VCHandler, replacing the current values of all virtual currencies.
+		/// </summary>
+		/// <param name="data">A Data object containing the values to load.</param>
+		public void LoadData(Data data)
+		{
+			if (data == null) return;
+			DataArray<float> dataArray = (DataArray<float>) data;
+			int              i         = 0;
+			foreach (var currency in virtualCurrencies)
+			{
+				currency.Value.value = dataArray.values[i];
+				i++;
+			}
 		}
 
 	}
 
-	public enum Currency
+	public enum CurrencyType
 	{
 
 		Coin = 1 << 0,

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ namespace THEBADDEST.VirtualCurrencySystem
     
         protected override void ChangeEffect(object sender, PropertyChangedEventArgs args)
         {
-            textContainer.text = (sender as VirtualCurrency)?.value.ToString();
+            textContainer.text = (sender as VirtualCurrency)?.value.ToString(CultureInfo.InvariantCulture);
         }
     }
 

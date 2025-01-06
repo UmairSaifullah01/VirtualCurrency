@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using THEBADDEST.DataManagement;
+using System.Runtime.CompilerServices;
 
 
 namespace THEBADDEST.VirtualCurrencySystem
@@ -11,32 +11,31 @@ namespace THEBADDEST.VirtualCurrencySystem
 	public class VirtualCurrency : INotifyPropertyChanged
 	{
 
-		public VirtualCurrency(Currency name, float initValue = 0)
-		{
-			Name = name;
-			if (!IsAvailable)
-			{
-				value = initValue;
-			}
-		}
+		float               m_value;
+		public CurrencyType type;
 
-		public Currency Name;
-		public bool     IsAvailable => DataPersistor.Contains(Name.ToString());
 
 		public float value
 		{
-			get => DataPersistor.Get<float>(Name.ToString());
+			get => m_value;
 			set
 			{
-				DataPersistor.Save(Name.ToString(), value);
+				m_value = value;
 				OnPropertyChanged();
 			}
 		}
 
+		public VirtualCurrency(CurrencyType type, float initValue = 0)
+		{
+			this.type  = type;
+			this.value = initValue;
+		}
+
+
 		public event PropertyChangedEventHandler PropertyChanged;
 
 
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		public virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}

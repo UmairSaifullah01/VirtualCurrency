@@ -3,26 +3,29 @@ using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 namespace THEBADDEST.VirtualCurrencySystem
 {
-    public abstract class CurrencyBinding : MonoBehaviour
-    {
-        [SerializeField] protected Currency currencyName;
-        private void OnDestroy()
-        {
-            if (VCHandler.Instance != null)
-                VCHandler.Instance.OnValueChangeUnregister (currencyName, ChangeEffect);
 
-        }
 
-        protected abstract void ChangeEffect(object sender,PropertyChangedEventArgs args);
-        
-        private void Start()
-        {
-            if (VCHandler.Instance != null)
-                VCHandler.Instance.OnValueChangeRegister (currencyName, ChangeEffect);
+	public abstract class CurrencyBinding : MonoBehaviour
+	{
 
-        }
-        
-    }
+		[SerializeField] protected CurrencyType currencyTypeName;
+
+		private void OnDestroy()
+		{
+			VCHandler.OnValueChangeUnregister(currencyTypeName, ChangeEffect);
+		}
+
+		protected abstract void ChangeEffect(object sender, PropertyChangedEventArgs args);
+
+		private void Start()
+		{
+			VCHandler.OnValueChangeRegister(currencyTypeName, ChangeEffect);
+		}
+
+	}
+
+
 }
