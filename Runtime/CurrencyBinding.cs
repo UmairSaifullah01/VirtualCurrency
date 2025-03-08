@@ -1,7 +1,5 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using UnityEngine;
-using UnityEngine.UI;
 
 
 namespace THEBADDEST.VirtualCurrencySystem
@@ -11,16 +9,16 @@ namespace THEBADDEST.VirtualCurrencySystem
 	public abstract class CurrencyBinding : MonoBehaviour
 	{
 
-		[SerializeField] protected CurrencyType currencyTypeName;
+		[SerializeField] protected CurrencyType currencyTypeName = CurrencyType.Coin;
 
-		private void OnDestroy()
+		protected virtual void OnDestroy()
 		{
 			VCHandler.OnValueChangeUnregister(currencyTypeName, ChangeEffect);
 		}
 
 		protected abstract void ChangeEffect(object sender, PropertyChangedEventArgs args);
 
-		private void Start()
+		protected virtual void Start()
 		{
 			VCHandler.OnValueChangeRegister(currencyTypeName, ChangeEffect);
 		}
