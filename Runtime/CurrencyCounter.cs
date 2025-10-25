@@ -36,8 +36,8 @@ namespace THEBADDEST.VirtualCurrencySystem
         [SerializeField] private int decimalPlaces = 1;
 
         [Header("Camera References")]
-        [SerializeField] Camera uiCamera;
-        [SerializeField] Camera mainCamera;
+        [SerializeField] public Camera uiCamera;
+        [SerializeField] public Camera mainCamera;
 
         [Header("Animation Settings")]
         [SerializeField] private float counterAnimationDuration = 1.5f;
@@ -60,6 +60,7 @@ namespace THEBADDEST.VirtualCurrencySystem
         private void Awake()
         {
             InitializeCoinPool();
+            
         }
 
         private void InitializeCoinPool()
