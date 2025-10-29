@@ -136,6 +136,7 @@ namespace THEBADDEST.VirtualCurrencySystem
                 case CurrencyDisplayFormat.Abbreviated:
                     return value.ToStringFormatted(decimalPlaces);
                 case CurrencyDisplayFormat.Normal:
+                    return value.ToString();
                 default:
                     var val = value.ToDouble();
                     return useThousandsSeparator

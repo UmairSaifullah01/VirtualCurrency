@@ -30,6 +30,7 @@ namespace THEBADDEST.VirtualCurrencySystem
                 case CurrencyDisplayFormat.Abbreviated:
                     return value.ToStringFormatted(decimalPlaces);
                 case CurrencyDisplayFormat.Normal:
+                    return value.ToString();
                 default:
                     // Show as normal number, with or without separator
                     var val = value.ToDouble();
