@@ -37,9 +37,9 @@ Add your currency types to the `CurrencyType` enum:
 ```csharp
 public enum CurrencyType
 {
-    Coin = 1 << 0,
-    Cash = 1 << 1,
-    Gems = 1 << 2  // Add your custom currencies
+    Coin = 0,
+    Cash = 1,
+    Gems = 2  // Add your custom currencies sequentially
 }
 ```
 
@@ -47,37 +47,43 @@ public enum CurrencyType
 
 Add a currency display to your UI:
 
-```csharp
-[SerializeField] private CurrencyCounter currencyCounter;
+Add a `CurrencyCounter` or `CurrencyText` component to a UI GameObject and configure the display format in the Inspector (Normal or Abbreviated), decimal places, and thousands separators.
 
-// Configure display format
-currencyCounter.displayFormat = CurrencyDisplayFormat.Abbreviated;
-```
+If you need to set values from code, update the underlying currency via the service (see next section) and the UI bindings will update automatically.
 
 ### 3. Managing Currency
 
 ```csharp
-// Add currency
-VCHandler.AddValue(CurrencyType.Coin, 1000);
+using THEBADDEST.VirtualCurrencySystem;
 
-// Get current value
-float coins = VCHandler.GetValue(CurrencyType.Coin);
+// Add currency (int/float overloads supported)
+VirtualCurrencyService.AddValue(CurrencyType.Coin, 1000);
+
+// Get current value (returns BigNumber)
+var coins = VirtualCurrencyService.GetValue(CurrencyType.Coin);
+double coinsAsDouble = coins.ToDouble();
+string coinsPretty = coins.ToStringFormatted(2); // e.g., 1.23K
 
 // Set specific value
-VCHandler.SetValue(CurrencyType.Cash, 500);
+VirtualCurrencyService.SetValue(CurrencyType.Cash, BigNumber.FromDouble(500));
+
+// Persist values
+VirtualCurrencyService.Save();
 ```
 
 ### 4. Implementing Purchasable Items
 
 ```csharp
-public class ShopItem : MonoBehaviour, IPurchasableWithCurrency
+using THEBADDEST.VirtualCurrencySystem;
+
+public class ShopItem : MonoBehaviour, IPurchasableItem
 {
     [SerializeField] private CurrencyType currencyType;
     [SerializeField] private float price;
     private bool isPurchased;
 
     public CurrencyType CurrencyType => currencyType;
-    public float Price => price;
+    public BigNumber Price => BigNumber.FromDouble(price);
     public bool IsPurchased
     {
         get => isPurchased;
@@ -86,40 +92,44 @@ public class ShopItem : MonoBehaviour, IPurchasableWithCurrency
 
     public void Purchase()
     {
-        VCHandler.Purchase(this,
+        VirtualCurrencyService.Purchase(
+            this,
             onSuccess: () => Debug.Log("Purchase successful!"),
             onFailed: () => Debug.Log("Not enough currency!")
         );
     }
 
-    public void PurchaseSuccess()
-    {
-        // Handle successful purchase
-    }
-
-    public void PurchasedFailed()
-    {
-        // Handle failed purchase
-    }
+    public void PurchaseSuccess() { }
+    public void PurchasedFailed() { }
 }
 ```
 
+### 5. Authoring Purchasable Items via ScriptableObject
+
+You can also author items as assets using `PurchasableItemSO`:
+
+1. Right-click in the Project window → Create → Virtual Currency → Purchasable Item
+2. Set `Currency Type` and `Price` (optional: Display Name, Icon)
+3. Reference the asset in your shop and pass it to `VirtualCurrencyService.Purchase(asset)`
+
 ## Best Practices
 
-1. **Save Regularly**: Call `VCHandler.Save()` after important currency changes
-2. **Use CanPurchase**: Check if a purchase is possible before attempting it
-3. **Implement Callbacks**: Use the callback version of Purchase for better user feedback
+1. **Save Regularly**: Call `VirtualCurrencyService.Save()` after important currency changes
+2. **Use CanPurchase**: Call `VirtualCurrencyService.CanPurchase(item)` before attempting a purchase
+3. **Implement Callbacks**: Use the callback version of `Purchase` for better user feedback
 4. **Choose Appropriate Display**: Use abbreviated format for large numbers, normal format for small amounts
 
 ## API Reference
 
-### VCHandler Methods
+### VirtualCurrencyService Methods
 
-- `AddValue(CurrencyType, float)`: Add or subtract currency
-- `GetValue(CurrencyType)`: Get current currency value
-- `SetValue(CurrencyType, float)`: Set currency to specific value
-- `Purchase(IPurchasableWithCurrency)`: Process a purchase
-- `CanPurchase(IPurchasableWithCurrency)`: Check if purchase is possible
+- `AddValue(CurrencyType, BigNumber)`: Add or subtract currency
+- `AddValue(CurrencyType, int|float)`: Convenience overloads
+- `GetValue(CurrencyType) -> BigNumber`: Get current currency value
+- `SetValue(CurrencyType, BigNumber)`: Set currency to specific value
+- `Purchase(IPurchasableItem)`: Process a purchase
+- `Purchase(IPurchasableItem, Action onSuccess, Action onFailed)`: Process with callbacks
+- `CanPurchase(IPurchasableItem) -> bool`: Check if purchase is possible
 - `Save()`: Save currency values
 - `Initialize()`: Initialize the currency system (called automatically)
 
