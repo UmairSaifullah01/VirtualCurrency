@@ -234,6 +234,19 @@ namespace THEBADDEST.VirtualCurrencySystem
             coinSpawnWorldPosition = worldPosition;
         }
 
+        public void SetReferences(Camera uiCamera = null, Camera mainCamera = null)
+        {
+            if (uiCamera != null)
+            {
+                this.uiCamera = uiCamera;
+            }
+
+            if (mainCamera != null)
+            {
+                this.mainCamera = mainCamera;
+            }
+        }
+
         protected override void ChangeEffect(object sender, PropertyChangedEventArgs args)
         {
             previousNumberValue = currentNumberValue;
