@@ -8,7 +8,7 @@ namespace THEBADDEST.VirtualCurrencySystem
 	/// ScriptableObject-based purchasable item definition implementing <see cref="IPurchasableItem"/>.
 	/// Create assets via the Create menu and reference them in your game content.
 	/// </summary>
-	[CreateAssetMenu(fileName = "PurchasableItem", menuName = "Virtual Currency/Purchasable Item", order = 0)]
+	[CreateAssetMenu(fileName = "PurchasableItem", menuName = "THEBADDEST/Virtual Currency/Purchasable Item", order = 0)]
 	public class PurchasableItemSO : ScriptableObject, IPurchasableItem
 	{
 		[Header("Purchase Settings")]
