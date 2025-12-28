@@ -1,0 +1,21 @@
+{
+    "name": "THEBADDEST.VirtualCurrency.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4eb73ea38c1d44320b0395b6207fb454",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:4805c15db0d76436fba326281a8ad2e2"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
+

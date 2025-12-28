@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2688eae8f8a4d48e9b4d61fc6b076ea0, type: 3}
+  m_Name: VirtualCurrencyService
+  m_EditorClassIdentifier: 
+  currencyConfigs:
+  - currencyName: Coin
+    valueType: 0
+    initialValueInt: 0
+    initialValueFloat: 0
+    initialValueBigNumber: 0|0
+  - currencyName: Gem
+    valueType: 0
+    initialValueInt: 0
+    initialValueFloat: 0
+    initialValueBigNumber: 0|0
+  - currencyName: Gold
+    valueType: 0
+    initialValueInt: 0
+    initialValueFloat: 0
+    initialValueBigNumber: 0|0
