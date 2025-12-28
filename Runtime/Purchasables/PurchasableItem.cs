@@ -14,7 +14,7 @@ namespace THEBADDEST.VirtualCurrencySystem
 	public class PurchasableItem : IPurchasableItem
 	{
 
-		[SerializeField] private CurrencyType currencyType;
+		[SerializeField] private string currencyName = CurrencyType.Coin;
 		[SerializeField] private float price;
 
 		private bool purchased = false;
@@ -22,9 +22,9 @@ namespace THEBADDEST.VirtualCurrencySystem
 		private Action OnSuccess, OnFail;
 		
 		/// <summary>
-		/// The currency type required for this purchase.
+		/// The currency name required for this purchase.
 		/// </summary>
-		public CurrencyType CurrencyType => currencyType;
+		public string CurrencyName => currencyName;
 		
 		/// <summary>
 		/// The price represented as a <see cref="BigNumber"/>.

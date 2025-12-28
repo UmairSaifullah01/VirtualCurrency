@@ -9,18 +9,18 @@ namespace THEBADDEST.VirtualCurrencySystem
 	public abstract class CurrencyBinding : MonoBehaviour
 	{
 
-		[SerializeField] protected CurrencyType currencyTypeName = CurrencyType.Coin;
+		[SerializeField] protected string currencyName = CurrencyType.Coin;
 
 		protected virtual void OnDestroy()
 		{
-			VirtualCurrencyService.OnValueChangeUnregister(currencyTypeName, ChangeEffect);
+			VirtualCurrencyService.OnValueChangeUnregister(currencyName, ChangeEffect);
 		}
 
 		protected abstract void ChangeEffect(object sender, PropertyChangedEventArgs args);
 
 		protected virtual void Start()
 		{
-			VirtualCurrencyService.OnValueChangeRegister(currencyTypeName, ChangeEffect);
+			VirtualCurrencyService.OnValueChangeRegister(currencyName, ChangeEffect);
 		}
 
 	}

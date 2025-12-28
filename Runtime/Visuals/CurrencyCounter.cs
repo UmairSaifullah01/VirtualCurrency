@@ -136,6 +136,7 @@ namespace THEBADDEST.VirtualCurrencySystem
                 case CurrencyDisplayFormat.Abbreviated:
                     return value.ToStringFormatted(decimalPlaces);
                 case CurrencyDisplayFormat.Normal:
+                    return value.ToString();
                 default:
                     var val = value.ToDouble();
                     return useThousandsSeparator
@@ -231,6 +232,19 @@ namespace THEBADDEST.VirtualCurrencySystem
         public void SetCoinSpawnWorldPosition(Vector3 worldPosition)
         {
             coinSpawnWorldPosition = worldPosition;
+        }
+
+        public void SetReferences(Camera uiCamera = null, Camera mainCamera = null)
+        {
+            if (uiCamera != null)
+            {
+                this.uiCamera = uiCamera;
+            }
+
+            if (mainCamera != null)
+            {
+                this.mainCamera = mainCamera;
+            }
         }
 
         protected override void ChangeEffect(object sender, PropertyChangedEventArgs args)

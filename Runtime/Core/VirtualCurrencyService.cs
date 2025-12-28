@@ -1,206 +1,108 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using THEBADDEST.DataManagement;
 using UnityEngine;
 
 namespace THEBADDEST.VirtualCurrencySystem
 {
-	public class VirtualCurrencyService : IDataElement
+	public enum CurrencyValueType
 	{
-		static Dictionary<CurrencyType, VirtualCurrency> virtualCurrencies;
+		Int,
+		Float,
+		BigNumber
+	}
+
+	[System.Serializable]
+	public class CurrencyConfig
+	{
+		[Tooltip("The name of this currency (e.g., Coin, Gem, Gold)")]
+		public string currencyName = CurrencyType.Coin;
+
+		[Tooltip("The type of value this currency uses")]
+		public CurrencyValueType valueType = CurrencyValueType.BigNumber;
+
+		[Tooltip("Initial value when using Int type")]
+		public int initialValueInt = 0;
+
+		[Tooltip("Initial value when using Float type")]
+		public float initialValueFloat = 0f;
+
+		[Tooltip("Initial value when using BigNumber type (mantissa|exponent format)")]
+		public string initialValueBigNumber = "0|0";
+
+		/// <summary>
+		/// Gets the initial value as a BigNumber based on the configured value type.
+		/// </summary>
+		public BigNumber GetInitialValue()
+		{
+			switch (valueType)
+			{
+				case CurrencyValueType.Int:
+					return BigNumber.FromDouble(initialValueInt);
+				case CurrencyValueType.Float:
+					return BigNumber.FromDouble(initialValueFloat);
+				case CurrencyValueType.BigNumber:
+					return BigNumber.FromCompactString(initialValueBigNumber);
+				default:
+					return BigNumber.Zero;
+			}
+		}
+	}
+	[CreateAssetMenu(fileName = "VirtualCurrencyService", menuName = "THEBADDEST/Virtual Currency/Virtual Currency Service", order = 0)]
+	public partial class VirtualCurrencyService : ScriptableObject, IDataElement
+	{
 		public string dataTag => "VCHandler";
-		public static VirtualCurrencyService virtualCurrencyService;
+		Dictionary<string, VirtualCurrency> virtualCurrencies;
 
-		/// <summary>
-		/// Automatically called by Unity Runtime when the application is loaded.
-		/// Initializes the static <see cref="VirtualCurrencyService"/> instance and all virtual currencies by default value.
-		/// </summary>
-		[RuntimeInitializeOnLoadMethod]
-		public static void Initialize()
+		[Header("Currency Configuration")]
+		[Tooltip("List of all currencies in the system. Configure name, initial value, and value type for each.")]
+		[SerializeField] private List<CurrencyConfig> currencyConfigs = new List<CurrencyConfig>
 		{
-			virtualCurrencyService = new VirtualCurrencyService();
-			var types = Enum.GetNames(typeof(CurrencyType));
-			virtualCurrencies = new Dictionary<CurrencyType, VirtualCurrency>(types.Length);
-			for (int i = 0; i < types.Length; i++)
-			{
-				if (Enum.TryParse(types[i], out CurrencyType currency))
-				{
-					var virtualCurrency = new VirtualCurrency(currency, BigNumber.Zero);
-					virtualCurrencies.Add(currency, virtualCurrency);
-				}
-			}
-
-			DataPersistor.Get(virtualCurrencyService);
-		}
-
-		/// <summary>
-		/// Persists the current state of all virtual currencies to the default data storage location.
-		/// </summary>
-		public static void Save()
-		{
-			DataPersistor.Save(virtualCurrencyService);
-		}
-
-		/// <summary>
-		/// Registers a <see cref="PropertyChangedEventHandler"/> to a virtual currency's value change event.
-		/// </summary>
-		/// <param name="currencyType">The type of currency to register the event handler for.</param>
-		/// <param name="changeEvent">The event handler to register.</param>
-		public static void OnValueChangeRegister(CurrencyType currencyType, PropertyChangedEventHandler changeEvent)
-		{
-			virtualCurrencies[currencyType].PropertyChanged += changeEvent;
-			virtualCurrencies[currencyType].OnPropertyChanged();
-		}
-
-		/// <summary>
-		/// Unregisters a <see cref="PropertyChangedEventHandler"/> from a virtual currency's value change event.
-		/// </summary>
-		/// <param name="currencyType">The type of currency to unregister the event handler from.</param>
-		/// <param name="changeEvent">The event handler to unregister.</param>
-		public static void OnValueChangeUnregister(CurrencyType currencyType, PropertyChangedEventHandler changeEvent)
-		{
-			virtualCurrencies[currencyType].PropertyChanged -= changeEvent;
-		}
-
-		/// <summary>
-		/// Retrieves the current value of a virtual currency.
-		/// </summary>
-		/// <param name="currencyType">The type of currency to retrieve the value of.</param>
-		/// <returns>The current value of the specified currency.</returns>
-		public static BigNumber GetValue(CurrencyType currencyType)
-		{
-			return virtualCurrencies[currencyType].value;
-		}
-
-		/// <summary>
-		/// Increases the value of a virtual currency by a specified amount.
-		/// </summary>
-		/// <param name="currencyType">The type of currency to increase.</param>
-		/// <param name="value">The amount to add to the currency. Can be negative to decrease the currency.</param>
-		/// <returns>The new value of the currency.</returns>
-		public static BigNumber AddValue(CurrencyType currencyType, BigNumber value)
-		{
-			return virtualCurrencies[currencyType].value += value;
-		}
-
-		public static BigNumber AddValue(CurrencyType currencyType, float value)
-		{
-			return AddValue(currencyType, BigNumber.FromDouble(value));
-		}
-
-		public static BigNumber AddValue(CurrencyType currencyType, int value)
-		{
-			return AddValue(currencyType, BigNumber.FromDouble(value));
-		}
-
-		/// <summary>
-		/// Sets the value of a virtual currency.
-		/// </summary>
-		/// <param name="currencyType">The type of currency to set.</param>
-		/// <param name="value">The value to set the currency to.</param>
-		public static void SetValue(CurrencyType currencyType, BigNumber value)
-		{
-			virtualCurrencies[currencyType].value = value;
-		}
-
-		/// <summary>
-		/// Purchase an item using the new IPurchasableWithCurrency interface
-		/// </summary>
-		/// <param name="purchasableItem">The item to purchase</param>
-		/// <returns>True if the purchase was successful, false otherwise</returns>
-		public static bool Purchase(IPurchasableItem purchasableItem)
-		{
-			if (virtualCurrencies[purchasableItem.CurrencyType].value >= purchasableItem.Price)
-			{
-				virtualCurrencies[purchasableItem.CurrencyType].value -= purchasableItem.Price;
-				purchasableItem.PurchaseSuccess();
-				return true;
-			}
-
-			purchasableItem.PurchasedFailed();
-			return false;
-		}
-
-		/// <summary>
-		/// Purchase an item using the new IPurchasableWithCurrency interface with success and failure callbacks
-		/// </summary>
-		public static bool Purchase(IPurchasableItem purchasableItem, Action onSuccess = null, Action onFailed = null)
-		{
-			if (virtualCurrencies[purchasableItem.CurrencyType].value >= purchasableItem.Price)
-			{
-				virtualCurrencies[purchasableItem.CurrencyType].value -= purchasableItem.Price;
-				purchasableItem.PurchaseSuccess();
-				onSuccess?.Invoke();
-				return true;
-			}
-
-			purchasableItem.PurchasedFailed();
-			onFailed?.Invoke();
-			return false;
-		}
-
-		/// <summary>
-		/// Check if there are sufficient funds to purchase an item
-		/// </summary>
-		public static bool CanPurchase(IPurchasableItem purchasableItem)
-		{
-			return virtualCurrencies[purchasableItem.CurrencyType].value >= purchasableItem.Price;
-		}
+			new CurrencyConfig { currencyName = CurrencyType.Coin, valueType = CurrencyValueType.BigNumber, initialValueBigNumber = "0|0" },
+			new CurrencyConfig { currencyName = CurrencyType.Gem, valueType = CurrencyValueType.BigNumber, initialValueBigNumber = "0|0" },
+			new CurrencyConfig { currencyName = CurrencyType.Gold, valueType = CurrencyValueType.BigNumber, initialValueBigNumber = "0|0" }
+		};
+		
 
 		/// <summary>
 		/// Saves the current state of all virtual currencies deterministically using compact string format.
 		/// </summary>
-		/// <returns>A Data object containing the compact string values of all currencies in enum order.</returns>
+		/// <returns>A Data object containing the compact string values of all currencies in config order.</returns>
 		public Data SaveData()
 		{
-			var currencyTypes = (CurrencyType[])Enum.GetValues(typeof(CurrencyType));
-			string[] values = new string[currencyTypes.Length];
-			for (int i = 0; i < currencyTypes.Length; i++)
+			if (currencyConfigs == null || currencyConfigs.Count == 0) return new DataArray<string>(new string[0]);
+			
+			string[] values = new string[currencyConfigs.Count];
+			for (int i = 0; i < currencyConfigs.Count; i++)
 			{
-				values[i] = virtualCurrencies[currencyTypes[i]].value.ToCompactString();
+				string currencyName = currencyConfigs[i].currencyName;
+				if (virtualCurrencies != null && virtualCurrencies.ContainsKey(currencyName))
+				{
+					values[i] = virtualCurrencies[currencyName].value.ToCompactString();
+				}
+				else
+				{
+					values[i] = currencyConfigs[i].GetInitialValue().ToCompactString();
+				}
 			}
 
 			return new DataArray<string>(values);
 		}
 
 		/// <summary>
-		/// Loads currency values from a deterministic compact string array saved in enum order.
+		/// Loads currency values from a deterministic compact string array saved in config order.
 		/// </summary>
 		/// <param name="data">A Data object containing compact string values.</param>
 		public void LoadData(Data data)
 		{
-			if (data == null) return;
+			if (data == null || currencyConfigs == null) return;
 			DataArray<string> dataArray = (DataArray<string>)data;
-			var currencyTypes = (CurrencyType[])Enum.GetValues(typeof(CurrencyType));
-			int len = Mathf.Min(currencyTypes.Length, dataArray.values.Length);
+			int len = Mathf.Min(currencyConfigs.Count, dataArray.values.Length);
 			for (int i = 0; i < len; i++)
 			{
-				virtualCurrencies[currencyTypes[i]].value = BigNumber.FromCompactString(dataArray.values[i]);
+				string currencyName = currencyConfigs[i].currencyName;
+				VirtualCurrencyService.SetValue(currencyName, BigNumber.FromCompactString(dataArray.values[i]));
 			}
-		}
-
-		/// <summary>
-		/// Save all virtual currencies as a string.
-		/// </summary>
-		public static string SaveAllToString()
-		{
-			var dict = new Dictionary<string, string>();
-			foreach(var kv in virtualCurrencies)
-				dict[((int)kv.Key).ToString()] = kv.Value.value.ToCompactString();
-			return JsonUtility.ToJson(new Serialization<string, string>(dict));
-		}
-
-		/// <summary>
-		/// Load all virtual currencies from a string.
-		/// </summary>
-		public static void LoadAllFromString(string json)
-		{
-			if (string.IsNullOrEmpty(json)) return;
-			var dict = JsonUtility.FromJson<Serialization<string, string>>(json).ToDictionary();
-			foreach(var kv in dict)
-				if(int.TryParse(kv.Key, out int idx) && Enum.IsDefined(typeof(CurrencyType), idx))
-					virtualCurrencies[(CurrencyType)idx].value = BigNumber.FromCompactString(kv.Value);
 		}
 
 		[System.Serializable]
@@ -222,12 +124,5 @@ namespace THEBADDEST.VirtualCurrencySystem
 				return dict;
 			}
 		}
-	}
-
-	public enum CurrencyType
-	{
-		Coin = 0,
-		Cash = 1,
-		Gems = 2 // Add new currencies sequentially
 	}
 }

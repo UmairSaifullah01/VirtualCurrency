@@ -12,7 +12,7 @@ namespace THEBADDEST.VirtualCurrencySystem
 	{
 
 		BigNumber m_value; // changed from float
-		public CurrencyType type;
+		public string currencyName;
 
 
 		public BigNumber value
@@ -25,9 +25,9 @@ namespace THEBADDEST.VirtualCurrencySystem
 			}
 		}
 
-		public VirtualCurrency(CurrencyType type, BigNumber initValue)
+		public VirtualCurrency(string currencyName, BigNumber initValue)
 		{
-			this.type  = type;
+			this.currencyName = currencyName;
 			this.value = initValue;
 		}
 

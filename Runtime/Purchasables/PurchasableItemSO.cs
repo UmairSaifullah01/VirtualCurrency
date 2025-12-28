@@ -8,11 +8,11 @@ namespace THEBADDEST.VirtualCurrencySystem
 	/// ScriptableObject-based purchasable item definition implementing <see cref="IPurchasableItem"/>.
 	/// Create assets via the Create menu and reference them in your game content.
 	/// </summary>
-	[CreateAssetMenu(fileName = "PurchasableItem", menuName = "Virtual Currency/Purchasable Item", order = 0)]
+	[CreateAssetMenu(fileName = "PurchasableItem", menuName = "THEBADDEST/Virtual Currency/Purchasable Item", order = 0)]
 	public class PurchasableItemSO : ScriptableObject, IPurchasableItem
 	{
 		[Header("Purchase Settings")]
-		[SerializeField] private CurrencyType currencyType = CurrencyType.Coin;
+		[SerializeField] private string currencyName = CurrencyType.Coin;
 		[SerializeField] private float price = 0f;
 
 		[Header("Presentation (Optional)")]
@@ -23,9 +23,9 @@ namespace THEBADDEST.VirtualCurrencySystem
 		private Action onSuccess, onFail;
 
 		/// <summary>
-		/// The currency type required for this purchase.
+		/// The currency name required for this purchase.
 		/// </summary>
-		public CurrencyType CurrencyType => currencyType;
+		public string CurrencyName => currencyName;
 
 		/// <summary>
 		/// The price represented as a <see cref="BigNumber"/>.

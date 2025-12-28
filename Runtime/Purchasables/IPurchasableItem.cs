@@ -11,9 +11,9 @@ namespace THEBADDEST.VirtualCurrencySystem
 	public interface IPurchasableItem
 	{
 		/// <summary>
-		/// The type of currency required for the purchase
+		/// The name of the currency required for the purchase
 		/// </summary>
-		CurrencyType CurrencyType { get; }
+		string CurrencyName { get; }
 
 		/// <summary>
 		/// The price of the item in the specified currency
